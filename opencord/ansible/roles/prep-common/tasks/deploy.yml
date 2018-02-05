@@ -1,0 +1,23 @@
+- name: Include variables
+  include_vars: "{{ item }}"
+  with_items:
+    - "{{ cord_workdir }}/build/platform-install/profile_manifests/{{ cord_profile }}.yml"
+    - "{{ cord_workdir }}/build/platform-install/profile_manifests/local_vars.yml"
+
+- name: Print inventory_hostname vars
+  debug:
+    var: inventory_hostname
+
+
+- include: prep-buildnode.yml
+  when:
+   - inventory_hostname in groups[build]
+
+
+- include: prep-buildnode.yml
+  when:
+   - inventory_hostname in groups[build]
+
+- include: prep-headnode.yml
+  when:
+   - inventory_hostname in groups[build]

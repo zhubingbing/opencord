@@ -1,0 +1,31 @@
+cord_workdir: "/home/ubuntu/work/cord"
+cord_profile: "rcord"
+config_cord_profile_dir: "/opt/cord_profile"
+pull_docker_registry: "zhubingbing/"
+namespaces: ""
+pull_docker_tag: "cord-4.1"
+docker_registry: "docker-registry:6666"
+docker_namespace: "zhubingbing"
+cord_release: "cord-4.1"
+node_config_directory: "/etc/cord"
+deploy_registry: False
+
+
+
+# Variables required by MAAS
+fabric_ip: '10.6.1.1/24'
+management_ip: '10.1.0.1/24'
+management_network: '10.1.0.0/24'
+
+
+# openstack information
+
+os_project_name: "Default"
+os_user_domain_name: "Default"
+os_user_name: "admin"
+os_password: "99cloud"
+os_tenant_name: "admin"
+os_auth_url: "http://172.18.22.180:35357/v3"
+os_region_name: "RegionOne"
+os_identity_api_version: "3"
+

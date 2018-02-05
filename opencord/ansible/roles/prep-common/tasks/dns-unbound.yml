@@ -1,0 +1,31 @@
+- name: Install unbound
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  with_items:
+    - unbound
+
+- name: create unbound.conf from template
+  template:
+    src: unbound.conf.j2
+    dest: "{{ unbound_conf }}"
+    mode: 0644
+    owner: root
+    group: "{{ unbound_group }}"
+    # validate='unbound-checkconf %s' - can't use, checks path, not just config.
+
+- name: start-unbound
+  service:
+    name: unbound
+    enabled: yes
+    state: started
+
+- name: reload-unbound
+  service:
+    name: unbound
+    enabled: yes
+    state: reloaded
+
+

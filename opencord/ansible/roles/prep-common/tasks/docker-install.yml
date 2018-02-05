@@ -1,0 +1,55 @@
+- name: Prereqs and SSL support for apt for SSL
+  become: yes
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    cache_valid_time: 3600
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - python-pip
+
+- name: Trust docker apt key
+  become: yes
+  apt_key:
+    data: "{{ lookup('file', 'docker_apt_key.gpg') }}"
+
+- name: Add docker apt repo
+  become: yes
+  apt_repository:
+    repo: "{{ docker_apt_repo }}"
+
+- name: Install docker
+  become: yes
+  apt:
+    name: "docker-ce=17.06.*"
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Configure Docker
+  become: yes
+  template:
+      src=default_docker.j2
+      dest=/etc/default/docker
+      mode=0644
+      owner=root
+      group=root
+  notify: restart docker
+
+- name: Install docker-compose, docker python module, imagebuilder deps via pip
+  become: yes
+  pip:
+    name: "{{ item }}"
+  with_items:
+    - docker>=2.4.2
+    - docker-compose==1.15.0
+    - gitpython
+    - graphviz
+
+- name: Make current user part of the Docker group
+  become: yes
+  user:
+    name: "{{ ansible_user_id }}"
+    groups: "docker"
+    append: yes
+

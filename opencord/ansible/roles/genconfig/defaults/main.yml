@@ -1,0 +1,5 @@
+cord_workdir: "/work/cord"
+cord_podconfig: "{{ cord_workdir }}/build/podconfig/rcord-virtual.yml"
+genconfig_dir: "{{ cord_workdir }}/build/genconfig"
+scenarios_dir: "{{ cord_workdir }}/build/scenarios"
+platform_install_dir: "{{ cord_workdir }}/build/platform-install"

@@ -1,0 +1,240 @@
+config_cord_profile_dir: "/opt/cord_profile"
+pki_dir: "/opt/key/pki"
+ssh_pki_dir: "/opt/key/ssh_pki"
+credentials_dir: "/opt/key/credentials"
+config_dir: "/opt/cord_profile"
+config_key_dir: "/opt"
+
+site_name: placeholder-sitename
+
+
+# ca cert parameters
+ca_digest: "sha256"
+ca_size: 4096
+ca_root_days: 3650
+
+# passphrases for the key
+ca_root_phrase: "{{ lookup('password', credentials_dir ~ '/ca_root_phrase length=64') }}"
+
+# noninteractive csr subject
+ca_root_subj: "/C=US/ST=California/L=Menlo Park/O=ON.Lab/OU=Test Deployment/CN=CORD Test Deployment Root CA"
+
+# used to name the intermediate CA
+site_humanname: "Placeholder Site HumanName"
+site_suffix: "{{ site_name }}.test"
+
+# crypto parameters
+ca_im_days: 730
+
+# passphrases for the certificate
+ca_im_phrase: "{{ lookup('password', credentials_dir ~ '/ca_im_phrase length=64') }}"
+
+# noninteractive csr subject
+ca_im_subj: "/C=US/ST=California/L=Menlo Park/O=ON.Lab/OU=Test Deployment/CN={{ site_humanname }} Intermediate CA"
+
+
+# client/server cert parameters
+cert_size: 2048
+cert_digest: "sha256"
+cert_days: 365
+
+# site names
+site_name: placeholder-sitename
+site_humanname: "Placeholder Site HumanName"
+site_suffix: "{{ site_name }}.test"
+
+# Default subject prefix
+ssl_cert_subj_prefix: "/C=US/ST=California/L=Menlo Park/O=ON.Lab/OU={{ site_humanname }} Deployment"
+
+# lists of certificates to create
+server_certs:
+  - cn: "keystone.{{ site_suffix }}"
+    subj: "{{ ssl_cert_subj_prefix }}/CN=keystone.{{ site_suffix }}"
+    altnames:
+      - "DNS:keystone.{{ site_suffix }}"
+      - "DNS:keystone"
+  - cn: "xos-core.{{ site_suffix }}"
+    subj: "{{ ssl_cert_subj_prefix }}/CN=xos-core.{{ site_suffix }}"
+    altnames:
+      - "DNS:xos-core.{{ site_suffix }}"
+      - "DNS:xos-core"
+
+client_certs: []
+
+# password on SSH CA
+ssh_ca_phrase: "{{ lookup('password', credentials_dir ~ '/ssh_ca_phrase length=64') }}"
+
+# ssh-keygen parameters
+ssh_keytype: rsa
+ssh_keysize: 4096
+
+# name of master ssh key for this pod
+pod_sshkey_name: "headnode"
+
+# lists of keys to generate
+ssh_client_genkeys:
+  - name: "{{ pod_sshkey_name }}"
+
+ssh_host_genkeys: []
+
+## xos
+
+xos_db_name: xos
+xos_db_username: postgres
+xos_db_password: password
+xos_dir: /opt/xos
+
+# where cord files are copied to on head node
+head_cord_dir: "/opt/cord"
+head_cord_profile_dir: "/opt/cord_profile"
+head_credentials_dir: "/opt/credentials"
+
+# For storing OpenStack images
+image_dir: /opt/images
+
+# used in xos.yaml.j2, if True, other synchronizer container will not be started
+frontend_only: False
+
+# Set to True if you want to copy the admin-openrc.sh openstack config file
+use_openstack: True
+
+# Will be overridden if doing a full pod build
+use_maas: False
+
+# set to True to create the xos_redis container in the bootstrap context
+use_redis: True
+
+use_vtn: True
+
+# Docker related settings
+pull_docker_registry: ""
+pull_docker_tag: "candidate"
+
+xos_docker_networks:
+  - "xos"
+
+xos_bootstrap_ui_port: 9001
+xos_ui_port: 9000
+xos_chameleon_port: 9101
+
+xos_users: []
+
+# name of master ssh key for this pod
+pod_sshkey_name: "headnode"
+
+xos_services: []
+
+xos_tosca_config_templates: []
+
+xos_new_tosca_config_templates: []
+
+xos_other_templates: []
+
+# XOS Config (xos_config.yaml)
+xos_db_name: xos
+xos_db_username: postgres
+xos_db_password: password
+xos_dir: /opt/xos
+
+# GUI Config [new GUI], used in app.config.js.j2 and style.config.js.j2
+
+enabled_gui_extensions: []
+
+gw_port: 3000
+gui_api_endpoint: "/xosapi/v1"
+gui_websocket: "/"
+gui_project_name: "R-CORD"
+gui_favicon: "cord-favicon.png"
+gui_background: "cord-bg.jpg"
+gui_payoff: "Your VNF orchestrator"
+gui_logo: "cord-logo.png"
+gui_routes:
+  - label: "Slices"
+    state: "xos.core.slice"
+  - label: "Nodes"
+    state: "xos.core.node"
+  - label: "Instances"
+    state: "xos.core.instance"
+
+# used in admin-openrc.sh.j2
+keystone_admin_password: "{{ lookup('password', credentials_dir ~ '/cord_keystone_admin chars=ascii_letters,digits') }}"
+
+# used in deployment.yaml.j2
+xos_admin_user: "xosadmin@opencord.org"
+xos_admin_pass: "{{ lookup('password', credentials_dir ~ '/xosadmin@opencord.org chars=ascii_letters,digits') }}"
+xos_admin_first: XOS
+xos_admin_last: Admin
+
+site_name: placeholder-sitename
+site_humanname: "Placeholder Site HumanName"
+site_suffix: "{{ site_name }}.test"
+
+deployment_type: placeholder-deploymenttype
+
+deployment_flavors:
+  - m1.small
+  - m1.medium
+  - m1.large
+  - m1.xlarge
+
+# used in management-net.yaml.j2
+management_network_cidr: 172.27.0.0/24
+
+use_management_hosts: False
+management_hosts_net_cidr: 10.1.0.1/24
+management_hosts_net_range_xos_low: "10.1.0.128"
+management_hosts_net_range_xos_high: "10.1.0.254"
+
+# used in fabric.yaml.j2
+use_fabric: False
+fabric_network_cfg_json: "/opt/cord_profile/fabric-network-cfg.json"
+
+# Need to track each application's version separately
+cord_config_app_version: "1.4.0-SNAPSHOT"
+cord_vtn_app_version: "1.4.0-SNAPSHOT"
+
+onos_mavenrepo_url: "{{ 'http://mavenrepo.' ~ site_suffix ~ ':8080' }}"
+
+
+# used in carrierethernet-*.yaml.j2
+carrierethernet_domainid_prefix: "{{ site_name }}"
+
+
+###########
+#containers
+##########
+consul_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/consul-server:{{ cord_release }}"
+registrator_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/registrator:{{ cord_release }}"
+xos_postgres_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-postgres:{{ cord_release }}"
+redis_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/redis:{{ cord_release }}"
+xos_gui_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-gui:{{ cord_release }}"
+xos_tosca_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-tosca:{{ cord_release }}"
+xos_chameleon_image:  "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/chameleon:{{ cord_release }}"
+gui_extensions_store_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/node:{{ cord_release }}"
+xos_ws_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-ws:{{ cord_release }}"
+xos_ui_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-ui:{{ cord_release }}"
+gui_extension_vtr: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/gui-extension-vtr:{{ cord_release }
+}"
+gui_extension_rcord: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/gui-extension-rcord:{{ cord_release }}"
+
+volt_synchronizer: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/volt-synchronizer:{{ cord_release }}"
+vtn_synchronizer: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/vtn-synchronizer:{{ cord_release }}"
+
+openstack_synchronizer: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/openstack-synchronizer:{{ cord_release }}"
+
+onos_synchronizer: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/onos-synchronizer:{{ cord_release }}"
+
+vrouter_synchronizer: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/vrouter-synchronizer:{{ cord_release }}"
+
+addressmanager_synchronizer: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/addressmanager-synchronizer:{{ cord_release }}"
+
+vsg_synchronizer: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/vsg-synchronizer:{{ cord_release }}"
+
+vtr_synchronizer: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/vtr-synchronizer:{{ cord_release }}"
+
+fabric_synchronizer: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/fabric-synchronizer:{{ cord_release }}"
+
+exampleservice_synchronizer: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/exampleservice-synchronizer:{{ cord_release }}"
+
+
+

@@ -1,0 +1,3 @@
+- include: maven_repo.yml
+  when:
+    - inventory_hostname in groups['maven-repo']

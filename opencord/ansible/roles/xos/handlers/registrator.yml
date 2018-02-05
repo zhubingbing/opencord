@@ -1,0 +1,23 @@
+- name: Restart registrator container
+  vars:
+    service_name: "registrator"
+    service: "{{ registrator_services[service_name] }}"
+    registrator_container: "{{ check_registrator_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    privileged: yes
+    network_mode: bridge
+    volumes: "{{ service.volumes }}"
+    command: [
+         "-internal",
+         "-retry-attempts", "100",
+         "consul://consul:8500"
+    ]
+    links:
+      - consul
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - registrator_container.changed | bool

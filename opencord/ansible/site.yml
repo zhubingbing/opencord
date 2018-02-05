@@ -1,0 +1,40 @@
+- name: Apply role genconfig
+  gather_facts: false
+  hosts:
+    - localhost
+  serial: '{{ serial|default("0") }}'
+  roles:
+    - { role: genconfig,
+        tags: genconfig }
+
+
+- name: Apply role cord_profile
+  gather_facts: false
+  hosts:
+    - localhost
+  serial: '{{ serial|default("0") }}'
+  roles:
+    - { role: cord_profile,
+        tags: cord_profile }
+
+- name: Apply role xos
+  gather_facts: false
+  hosts:
+    - xos
+  serial: '{{ serial|default("0") }}'
+  roles:
+    - { role: xos,
+        tags: xos }
+
+- name: Apply role onos
+  gather_facts: false
+  hosts:
+    - onos-cord
+    - onos-fabric
+  serial: '{{ serial|default("0") }}'
+  roles:
+    - { role: onos,
+        tags: onos }
+
+
+

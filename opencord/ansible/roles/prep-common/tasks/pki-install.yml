@@ -1,0 +1,16 @@
+- name: print site_name
+  debug:
+    var: site_name
+
+- name: Copy CA certificates
+  copy:
+    src: "{{ pki_dir }}/{{ item.src }}"
+    dest: "/usr/local/share/ca-certificates/{{ item.dest }}"
+  with_items:
+    - src: "root_ca/certs/ca_cert.pem"
+      dest: "cord_root_ca.crt"
+    - src: "{{ site_name }}_im_ca/certs/im_cert.pem"
+      dest: "cord_intermediate_ca.crt"
+  notify:
+    - update-ca-certificates
+

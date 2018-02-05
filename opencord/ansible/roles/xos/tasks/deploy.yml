@@ -1,0 +1,6 @@
+---
+- include: copy-config.yml
+
+- include: apache-proxy.yml
+
+- include: xos_docker_compose.yml

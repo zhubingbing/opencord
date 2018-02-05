@@ -1,0 +1,222 @@
+---
+config_cord_profile_dir: "/opt/cord_profile"
+
+custom_config_dir: "/opt"
+config_directory: "/opt/cord_profile"
+config_cord_dir: "/opt/"
+head_cord_dir: "/opt/"
+
+xos_docker_networks:
+  - "xos"
+
+
+############
+#Container
+###########
+
+consul_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/consul"
+consul_tag: "{{ cord_release }}"
+consul_image_full: "{{ consul_image }}:{{ consul_tag }}"
+
+registrator_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/registrator"
+registrator_tag: "{{ cord_release }}"
+registrator_image_full: "{{ registrator_image }}:{{ registrator_tag }}"
+
+
+xos_db_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-postgres"
+xos_db_tag: "{{ cord_release }}"
+xos_db_image_full: "{{ xos_db_image }}:{{ xos_db_tag }}"
+
+redis_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-redis"
+redis_tag: "{{ cord_release }}"
+redis_image_full: "{{ redis_image }}:{{ redis_tag }}"
+
+
+xos_ui_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-ui"
+xos_ui_tag: "{{ cord_release }}"
+xos_ui_image_full: "{{ xos_ui_image }}:{{ xos_ui_tag }}"
+
+
+xos_ws_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-ws"
+xos_ws_tag: "{{ cord_release }}"
+xos_ws_image_full: "{{ xos_ws_image }}:{{ xos_ws_tag }}"
+
+
+xos_chameleon_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-chameleon"
+xos_chameleon_tag: "{{ cord_release }}"
+xos_chameleon_image_full: "{{ xos_chameleon_image }}:{{ xos_chameleon_tag }}"
+
+xos_gui_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-gui"
+xos_gui_tag: "{{ cord_release }}"
+xos_gui_image_full: "{{ xos_gui_image }}:{{ xos_gui_tag }}"
+
+
+xos_tosca_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/xos-tosca"
+xos_tosca_tag: "{{ cord_release }}"
+xos_tosca_image_full: "{{ xos_tosca_image }}:{{ xos_tosca_tag }}"
+
+
+node_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/node"
+node_tag: "{{ cord_release }}"
+node_image_full: "{{ node_image }}:{{ node_tag }}"
+
+
+gui_extension_vtr_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/gui-extension-vtr"
+gui_extension_vtr_tag: "{{ cord_release }}"
+gui_extension_vtr_image_full: "{{ gui_extension_vtr_image }}:{{ gui_extension_vtr_tag }}"
+
+gui_extension_rcord_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/gui-extension-rcord"
+gui_extension_rcord_tag: "{{ cord_release }}"
+gui_extension_rcord_image_full: "{{ gui_extension_rcord_image }}:{{ gui_extension_rcord_tag }}"
+
+
+
+#############
+## xos
+##############
+xos_services:
+  xos-db:
+    container_name: "xos_db"
+    group: "xos-db"
+    enabled: true
+    image: "{{ xos_db_image_full }}"
+    volumes:
+      - "{{ config_directory }}/xos-db/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+  xos-ui:
+    container_name: "xos_ui"
+    group: "xos-ui"
+    enabled: true
+    image: "{{ xos_ui_image_full }}"
+    volumes:
+      - "{{ config_directory }}/xos-ui/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/root/cord/cord_profile:/opt/cord_profile:ro"
+      - "/etc/kolla/xos-ui/xos_config.yaml:/opt/xos/xos_config.yaml:ro"
+      - "/root/cord/cord_profile/im_cert_chain.pem:/usr/local/share/ca-certificates/local_certs.crt:ro"
+      - "/etc/hosts:/etc/hosts:ro"
+  xos-core:
+    container_name: "xos_core"
+    group: "xos-core"
+    enabled: true
+    image: "{{ xos_ui_image_full }}"
+    volumes:
+      - "{{ config_directory }}/xos-core/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/kolla/xos-core/xos_config.yaml:/opt/xos/xos_config.yaml:ro"
+      - "/etc/kolla/xos-core/initial_data.yaml:/opt/xos/core/migrations/initial_data.yaml:ro"
+      - "/etc/hosts:/etc/hosts:ro"
+      - "/root/cord/cord_profile:/opt/cord_profile:ro"
+      - "/root/cord/cord_profile/im_cert_chain.pem:/usr/local/share/ca-certificates/local_certs.crt:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+  xos-ws:
+    container_name: "xos_ws"
+    group: "xos-ws"
+    enabled: true
+    image: "{{ xos_ws_image_full }}"
+    volumes:
+      - "{{ config_directory }}/xos-ws/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/hosts:/etc/hosts:ro"
+      - "/etc/kolla/xos-ws/gateway-config.yml:/var/www/src/config/gateway-config.yml:ro"
+  xos-chameleon:
+    container_name: "xos_chameleon"
+    group: "xos-chameleon"
+    enabled: true
+    image: "{{ xos_chameleon_image_full }}"
+    volumes:
+      - "{{ config_directory }}/xos-chameleon/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/hosts:/etc/hosts:ro"
+  xos-gui:
+    container_name: "xos_gui"
+    group: "xos-gui"
+    enabled: true
+    image: "{{ xos_gui_image_full }}"
+    volumes:
+      - "{{ config_directory }}/xos-gui/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/hosts:/etc/hosts:ro"
+      - "/etc/kolla/xos-gui/app.config.js:/var/www/dist/app.config.js"
+      - "/etc/kolla/xos-gui/style.config.js:/var/www/dist/style.config.js"
+  xos-tosca:
+    container_name: "xos_tosca"
+    group: "xos-tosca"
+    enabled: true
+    image: "{{ xos_tosca_image_full }}"
+    volumes:
+      - "{{ config_directory }}/xos-gui/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "/etc/hosts:/etc/hosts:ro"
+      - "/etc/kolla/xos-tosca/xos-tosca.config.yaml:/opt/xos-tosca/src/xos-tosca.config.yaml"
+      - "/etc/kolla/xos-tosca/im_cert_chain.pem:/usr/local/share/ca-certificates/local_certs.crt:ro"
+  xos-gui-extensions-store:
+    container_name: "xos_gui_extensions_store"
+    group: "xos-gui"
+    enabled: true
+    image: "{{ node_image_full }}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+
+
+consul_services:
+  consul-server:
+    container_name: "consul"
+    group: "consul-server"
+    enabled: true
+    image: "{{ consul_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/consul-server/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "consul:/var/lib/consul"
+
+redis_services:
+  redis:
+    container_name: "xos_redis"
+    group: "redis"
+    enabled: true
+    image: "{{ redis_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/redis/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+gui_extensions_store_services:
+  gui_extensions_store:
+    container_name: "gui_extensions_store"
+    group: "xos-gui"
+    enabled: true
+    image: "{{ node_image_full }}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+registrator_services:
+  registrator:
+    container_name: "registrator"
+    group: "registrator"
+    privileged: True
+    enabled: true
+    image: "{{ registrator_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/registrator/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+gui_extension_services:
+  gui-extension-vtr:
+    container_name: "gui_extension_vtr"
+    group: "gui-extension-vtr"
+    privileged: True
+    enabled: true
+    image: "{{ gui_extension_vtr_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/gui-extension-vtr/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+  gui-extension-rcord:
+    container_name: "gui_extension_rcord"
+    group: "gui-extension-rcord"
+    privileged: True
+    enabled: true
+    image: "{{ gui_extension_rcord_image_full }}"
+    volumes:
+      - "{{ node_config_directory }}/gui-extension-rcord/:{{ container_config_directory }}/:ro"
+      - "/etc/localtime:/etc/localtime:ro"

@@ -1,0 +1,122 @@
+- name: Print config_cord_profile_dir vars
+  debug:
+    var: config_cord_profile_dir
+
+- name: Create cord_profile directory
+  file:
+    path: "{{ config_cord_profile_dir }}"
+    state: directory
+    mode: 0755
+
+- name: Create cord_profile/profile_name file containing profile name
+  copy:
+    dest: "{{ config_cord_profile_dir }}/profile_name"
+    content: "{{ cord_profile }}"
+    mode: 0644
+
+- name: Create subdirectories inside cord_profile directory
+  file:
+    path: "{{ config_cord_profile_dir }}/{{ item }}"
+    state: directory
+    mode: 0755
+  with_items:
+    - key_import
+    - images
+
+- name: Copy ssh private key to node_key file
+  copy:
+    src: "{{ ssh_pki_dir }}/client_certs/{{ pod_sshkey_name }}_sshkey"
+    dest: "{{ config_cord_profile_dir }}/node_key"
+    mode: 0600
+    remote_src: True
+
+- name: Copy ssh public key to node_key.pub file
+  copy:
+    src: "{{ ssh_pki_dir }}/client_certs/{{ pod_sshkey_name }}_sshkey.pub"
+    dest: "{{ config_cord_profile_dir }}/node_key.pub"
+    mode: 0600
+    remote_src: True
+
+- name: Copy ssh private key to key_import directory for services that require it
+  copy:
+    src: "{{ ssh_pki_dir }}/client_certs/{{ pod_sshkey_name }}_sshkey"
+    dest: "{{ config_cord_profile_dir }}/key_import/{{ item.keypair }}"
+    mode: 0600
+    remote_src: True
+  with_items: "{{ xos_services | selectattr('keypair', 'defined') | list }}"
+
+- name: Copy ssh public key to key_import directory for services that require it
+  copy:
+    src: "{{ ssh_pki_dir }}/client_certs/{{ pod_sshkey_name }}_sshkey.pub"
+    dest: "{{ config_cord_profile_dir }}/key_import/{{ item.keypair }}.pub"
+    mode: 0644
+    remote_src: True
+  with_items: "{{ xos_services | selectattr('keypair', 'defined') | list }}"
+
+- name: Copy cert chain and core api key and cert
+  copy:
+    src: "{{ pki_dir }}/{{ item.src }}"
+    dest: "{{ config_cord_profile_dir }}/{{ item.dest }}"
+    mode: 0600
+  with_items:
+    - src: "{{ site_name }}_im_ca/private/xos-core.{{ site_suffix }}_key.pem"
+      dest: "core_api_key.pem"
+    - src: "{{ site_name }}_im_ca/certs/xos-core.{{ site_suffix }}_cert_chain.pem"
+      dest: "core_api_cert.pem"
+    - src: "{{ site_name }}_im_ca/certs/im_cert_chain.pem"
+      dest: "im_cert_chain.pem"
+
+- name: Copy over commonly used and utility TOSCA files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ config_cord_profile_dir }}/{{ item }}"
+  with_items:
+    - fixtures.yaml
+    - enable-onboarding.yaml
+    - disable-onboarding.yaml
+
+- name: Create templated XOS configuration files
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ config_cord_profile_dir }}/{{ item }}"
+    mode: 0644
+  with_items:
+    - xos_config.yaml
+    - xos_config_synchronizer.yaml
+    - initial_data.yaml
+    - deployment.yaml
+    - xos.yaml
+    - gateway-config.yml
+    - style.config.js
+    - app.config.js
+    - Dockerfile.xos
+    - xos-gui-extensions.yml
+    - docker-compose.yml
+    - xos-tosca.config.yaml
+
+- name: Create profile specific templated TOSCA config files
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ config_cord_profile_dir }}/{{ item }}"
+  with_items: "{{ xos_tosca_config_templates }}"
+
+- name: Create profile specific templated TOSCA config files (new Engine)
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ config_cord_profile_dir }}/{{ item }}"
+  with_items: "{{ xos_new_tosca_config_templates }}"
+
+- name: Create profile specific templated non-TOSCA files
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ config_cord_profile_dir }}/{{ item }}"
+  with_items: "{{ xos_other_templates }}"
+
+- name: Create OpenStack config and TOSCA onboarding
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ config_cord_profile_dir }}/{{ item }}"
+  with_items:
+    - openstack.yaml
+    - admin-openrc.sh
+    - clouds.yaml

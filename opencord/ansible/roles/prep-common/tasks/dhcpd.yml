@@ -1,0 +1,30 @@
+- name: Install dhcpd
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    cache_valid_time: 3600
+  with_items:
+    - isc-dhcp-server
+
+- name: Create /etc/dhcp/dhcpd.conf from template
+  template:
+    src: dhcpd.conf.j2
+    dest: /etc/dhcp/dhcpd.conf
+    mode: "0644"
+    owner: root
+    group: root
+    #    validate: 'dhcpd -t -cf %s'
+
+- name: Set interfaces for dhcpd to listen on
+  template:
+    src: isc-dhcp-server.j2
+    dest: /etc/default/isc-dhcp-server
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: restart-dhcpd
+  service:
+    name: isc-dhcp-server
+    state: restarted
+

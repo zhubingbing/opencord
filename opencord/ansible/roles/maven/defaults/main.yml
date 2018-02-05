@@ -1,0 +1,14 @@
+---
+project_name: "maven"
+
+maven_repo_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ cord_base_distro }}-{{ cord_install_type }}-mavenrepo"
+maven_repo_tag: "{{ cord_release }}"
+maven_repo_image_full: "{{ maven_repo_image }}:{{ maven_repo_tag }}"
+
+
+maven_services:
+  maven-repo:
+    container_name: "maven_repo"
+    group: "maven-repo"
+    enabled: true
+    image: "{{ maven_repo_image_full }}"

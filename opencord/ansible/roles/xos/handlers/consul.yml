@@ -1,0 +1,25 @@
+- name: Restart consul-server container
+  vars:
+    service_name: "consul-server"
+    service: "{{ consul_services[service_name] }}"
+    consul_container: "{{ check_consul_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    network_mode: bridge
+    command: "-advertise= {{ api_interface_address }} -server -bootstrap"
+    ports:
+      - "8500:8500"
+    env:
+      SERVICE_8300_IGNORE: "yes"
+      SERVICE_8301_IGNORE: "yes"
+      SERVICE_8302_IGNORE: "yes"
+      SERVICE_8400_IGNORE: "yes"
+      SERVICE_8500_NAME: "consul-rest"
+      SERVICE_8600_IGNORE: "yes"
+    volumes: "{{ service.volumes }}"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - consul_container.changed | bool

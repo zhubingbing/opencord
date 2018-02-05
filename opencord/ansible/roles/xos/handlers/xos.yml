@@ -1,0 +1,188 @@
+- name: Restart xos-db container
+  vars:
+    service_name: "xos-db"
+    service: "{{ xos_services[service_name] }}"
+    xos_db_container: "{{ check_xos_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    network_mode: bridge
+    exposed_ports:
+      - 5432
+    env:
+      SERVICE_5432_NAME: "xos-db"
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    volumes: "{{ service.volumes }}"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - xos_db_container.changed | bool
+
+- name: Restart xos-ui container
+  vars:
+    service_name: "xos-ui"
+    service: "{{ xos_services[service_name] }}"
+    xos_ui_container: "{{ check_xos_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    command: python /opt/xos/manage.py runserver 0.0.0.0:9000
+    network_mode: host
+    ports:
+      - "9000:9000"
+    env:
+      SERVICE_9000_NAME: "xos-ui-deprecated"
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    volumes: "{{ service.volumes }}"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - xos_ui_container.changed | bool
+      or xos_ui_confs.changed | bool
+
+
+- name: Restart xos-core container
+  vars:
+    service_name: "xos-core"
+    service: "{{ xos_services[service_name] }}"
+    xos_core_container: "{{ check_xos_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    privileged: yes
+    network_mode: host
+    command: bash -c "cd coreapi; bash ./start_coreapi.sh"
+    ports:
+      - "50051:50051"
+      - "50055:50055"
+    env:
+      SERVICE_50051_NAME: "xos-grpc-secure"
+      SERVICE_50055_NAME: "xos-grpc-insecure"
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    volumes: "{{ service.volumes }}"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - xos_core_container.changed | bool
+      or xos_core_confs.changed | bool
+
+- name: Restart xos-ws container
+  vars:
+    service_name: "xos-ws"
+    service: "{{ xos_services[service_name] }}"
+    xos_ws_container: "{{ check_xos_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    privileged: yes
+    network_mode: host
+    command: npm start -- --config gateway-config.yml
+    ports:
+      - "3000:3000"
+    env:
+      SERVICE_3000_NAME: "xos-ws"
+    volumes: "{{ service.volumes }}"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - xos_ws_container.changed | bool
+      or xos_ws_confs.changed | bool
+
+
+- name: Restart xos-chameleon container
+  vars:
+    service_name: "xos-chameleon"
+    service: "{{ xos_services[service_name] }}"
+    xos_chameleon_container: "{{ check_xos_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    privileged: yes
+    network_mode: host
+    command: python chameleon/chameleon/main.py -R 9101 -G xos-core:50055 --swagger-url /apidocs
+    ports:
+      - "9101:9101"
+    env:
+      SERVICE_9101_NAME: "xos-rest"
+    volumes: "{{ service.volumes }}"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - xos_chameleon_container.changed | bool
+
+- name: Restart xos-gui container
+  vars:
+    service_name: "xos-gui"
+    service: "{{ xos_services[service_name] }}"
+    xos_gui_container: "{{ check_xos_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    privileged: yes
+    network_mode: host
+    ports:
+      - "4000:4000"
+    env:
+      SERVICE_4000_NAME: "xos-gui"
+      SERVICE_80_IGNORE: "yes"
+    volumes: "{{ service.volumes }}"
+    volumes_from:
+      - xos_gui_extensions_store
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - xos_gui_container.changed | bool
+      or xos_gui_confs.changed | bool
+
+- name: Restart xos-tosca container
+  vars:
+    service_name: "xos-tosca"
+    service: "{{ xos_services[service_name] }}"
+    xos_tosca_container: "{{ check_xos_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    privileged: yes
+    network_mode: host
+    ports:
+      - "9102:9102"
+    env:
+      SERVICE_9102_NAME: "xos-tosca"
+    volumes: "{{ service.volumes }}"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - xos_tosca_container.changed | bool
+      or xos_tosca_confs.changed | bool
+
+- name: Restart xos-gui-extensions-store container
+  vars:
+    service_name: "xos-gui-extensions-store"
+    service: "{{ xos_services[service_name] }}"
+    xos_tosca_container: "{{ check_xos_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    command: sleep infinity
+    network_mode: host
+    volumes:
+      - /var/www/dist/extensions
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - xos_tosca_container.changed | bool

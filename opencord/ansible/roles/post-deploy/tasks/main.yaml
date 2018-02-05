@@ -1,0 +1,7 @@
+- name: Wait for XOS Chameleon to be ready after service onboarding #this means core is ready
+  shell: curl localhost:{{ xos_chameleon_port }}/xosapi/v1/modeldefs
+  register: result
+  until: result.stdout.find("items") != -1
+  retries: 30
+  delay: 20
+

@@ -1,0 +1,16 @@
+[control]
+# These hostname must be resolvable from your deployment host
+compute1   ansible_ssh_user=root 
+
+[genconfig:children]
+control
+
+[onos-cord:children]
+control
+
+[onos-fabric:children]
+control
+
+[xos:children]
+control
+

@@ -1,0 +1,18 @@
+- name: Restart maven-repo container
+  vars:
+    service_name: "maven-repo"
+    service: "{{ maven_services[service_name] }}"
+    maven_repo_container: "{{ check_maven_repo_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    privileged: yes
+    network_mode: bridge
+    ports:
+      - "8080:8080"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - maven_repo_container.changed | bool

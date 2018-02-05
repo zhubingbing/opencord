@@ -1,0 +1,110 @@
+# http://serverfault.com/questions/40712/what-range-of-mac-addresses-can-i-safely-use-for-my-virtual-machines
+hwaddr_prefix: "c2a4"
+
+site_name: placeholder-sitename
+site_suffix: "{{ site_name }}.test"
+
+# Management IP range from DHCP settings
+mgmt_ipv4_first_octets: "192.168.200"
+
+# node lists
+head_lxd_list: []
+physical_node_list: []
+
+dns_search:
+  - "{{ site_suffix }}"
+
+dns_servers:
+  - "{{ mgmt_ipv4_first_octets }}.1"
+
+dhcpd_subnets:
+  - interface: mgmtbr
+    cidr: "{{ mgmt_ipv4_first_octets }}.1/24"
+    dhcp_first: 129
+    dhcp_last: 254
+    other_static:
+      - physical_node_list
+      - head_lxd_list
+
+
+
+unbound_listen_on_default: False
+
+# public internet facing NAT interface
+mgmtbr_nat_interface: eth0
+
+# management interface bridged to mgmtbr
+mgmtbr_ext_interface: eth1
+
+mgmt_interface: eth1
+
+mgmt_ipv4_first_octets: "192.168.200"
+
+physical_node_list: []
+
+docker_apt_repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+docker_opts: ""
+
+use_maas: false
+
+ssh_pki_dir: "{{ playbook_dir }}/key/ssh_pki"
+ssh_keytype: rsa
+pod_sshkey_name: "headnode"
+
+
+# dns-unbound/defaults/main.yml
+
+unbound_conf: "/etc/unbound/unbound.conf"
+unbound_group: "unbound"
+
+unbound_listen_on_default: False
+
+unbound_listen_all: True
+
+# NOTE - many of the below settings are shared with the dns-nsd role, and you
+# may need to update them in the defaults of both.
+
+site_name: placeholder-sitename
+site_suffix: "{{ site_name }}.test"
+
+headnode_dns: head1
+
+# Management IP range from DHCP settings
+mgmt_ipv4_first_octets: "192.168.200"
+mgmt_name_reverse_unbound: "168.192.in-addr.arpa"
+
+unbound_interfaces:
+  - "{{ mgmt_ipv4_first_octets }}.1/24"
+
+# node lists
+head_lxd_list: []
+physical_node_list: []
+
+# DNS settings for NSD/Unbound
+nsd_zones:
+  - name: "{{ site_suffix }}"
+    ipv4_first_octets: "{{ mgmt_ipv4_first_octets }}"
+    name_reverse_unbound: "{{ mgmt_name_reverse_unbound }}"
+    soa: ns1
+    ns:
+      - { name: ns1 }
+    nodelists:
+      - head_lxd_list
+      - physical_node_list
+    aliases:
+      - { name: "apt-cache", dest: "{{ headnode_dns }}" }
+      - { name: "cordloghost", dest: "{{ headnode_dns }}" }
+      - { name: "consul", dest: "{{ headnode_dns }}" }
+      - { name: "docker", dest: "{{ headnode_dns }}" }
+      - { name: "mavenrepo", dest: "{{ headnode_dns }}" }
+      - { name: "ns", dest: "{{ headnode_dns }}" }
+      - { name: "ns1", dest: "{{ headnode_dns }}" }
+      - { name: "onos-cord", dest: "{{ headnode_dns }}" }
+      - { name: "onos-fabric", dest: "{{ headnode_dns }}" }
+      - { name: "xos", dest: "{{ headnode_dns }}" }
+      - { name: "xos-chameleon", dest: "{{ headnode_dns }}" }
+      - { name: "xos-consul", dest: "{{ headnode_dns }}" }
+      - { name: "xos-core", dest: "{{ headnode_dns }}" }
+      - { name: "xos-gui", dest: "{{ headnode_dns }}" }
+      - { name: "xos-tosca", dest: "{{ headnode_dns }}" }
+      - { name: "xos-ws", dest: "{{ headnode_dns }}" }

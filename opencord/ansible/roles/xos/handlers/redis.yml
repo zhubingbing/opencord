@@ -1,0 +1,20 @@
+- name: Restart redis container
+  vars:
+    service_name: "redis"
+    service: "{{ redis_services[service_name] }}"
+    redis_container: "{{ check_redis_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    network_mode: bridge
+    privileged: yes
+    ports:
+      - "9102:9102"
+    env:
+      SERVICE_NAME: "redis"
+    volumes: "{{ service.volumes }}"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - redis_container.changed | bool

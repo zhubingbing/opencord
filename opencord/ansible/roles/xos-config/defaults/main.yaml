@@ -1,0 +1,6 @@
+xos_admin_user: "xosadmin@opencord.org"
+
+xos_tosca_config_templates: []
+
+use_openstack: True
+

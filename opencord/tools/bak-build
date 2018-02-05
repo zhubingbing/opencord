@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+# Build images
+
+Registry_Url="172.16.130.11:4000"
+CORDDIR="${CORDDIR:-/word/cord}"
+
+
+function build_maas_images() {
+  cd $CORDDIR/build/maas/provisioner
+  docker build  -f Dockerfile.provisioner \
+		-t opencord/maas-provisioner:candidate . 
+ 
+  cd $CORDDIR/build/maas/switchq
+  docker build  -f Dockerfile.switchq \
+		-t opencord/maas-switchq:candidate .
+
+  cd $CORDDIR/build/maas/harvester
+  docker build  -f Dockerfile.harvester \
+                -t opencord/maas-harvester:candidate .
+
+  cd $CORDDIR/build/maas/ip-allocator
+  docker build  -f Dockerfile.allocator \
+                -t opencord/maas-allocator:candidate .
+
+  cd $CORDDIR/build/maas/automation
+  docker build  -f Dockerfile.automation \
+                -t opencord/maas-automation:candidate . 
+
+  cd $CORDDIR/build/maas/config-generator
+  docker build  -f Dockerfile.generator \
+                -t opencord/maas-generator:candidate .
+
+  docker pull consul
+
+}
+
+function build_maven_images()
+{
+    cd $CORDDIR/onos-apps
+    make MAKE_CONFIG=../build/genconfig/config.mk build
+}
+
+
+function push_maas_images() {
+   docker tag opencord/maas-generator:candidate $Registry_Url/opencord/maas-generator:candidate
+   docker push $Registry_Url/opencord/maas-generator:candidate
+
+   docker tag opencord/maas-provisioner:candidate $Registry_Url/opencord/maas-provisioner:candidate 
+   docker push $Registry_Url/opencord/maas-provisioner:candidate
+
+   docker tag opencord/maas-automation:candidate $Registry_Url/opencord/maas-automation:candidate
+   docker push $Registry_Url/opencord/maas-automation:candidate
+
+   docker tag opencord/maas-allocator:candidate $Registry_Url/opencord/maas-allocator:candidate
+   docker push $Registry_Url/opencord/maas-allocator:candidate
+
+   docker tag opencord/maas-harvester:candidate $Registry_Url/opencord/maas-harvester:candidate
+   docker push $Registry_Url/opencord/maas-harvester:candidate
+
+   docker tag opencord/maas-switchq:candidate $Registry_Url/opencord/maas-switchq:candidate
+   docker push $Registry_Url/opencord/maas-switchq:candidate 
+
+   docker tag consul $Registry_Url/consul:candidate
+
+
+}
+
+build_maas_images
+push_maas_images
+
+

@@ -1,0 +1,22 @@
+- name: Create mavenrepo directory
+  become: yes
+  file:
+    path: "{{ head_mavenrepo_dir }}"
+    state: directory
+    mode: 0755
+
+
+- name: start maven-repo container
+  vars:
+    service_name: "maven-repo"
+    service: "{{ maven_services[service_name] }}"
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    state: "started"
+    network_mode: bridge
+    volumes: "{{ service.volumes }}"
+    ports:
+      - "8080:80"
+  when:
+    - service.enabled | bool

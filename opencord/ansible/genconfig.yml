@@ -1,0 +1,6 @@
+- name: Generate config files
+  hosts: head
+  connection: local
+  gather_facts: False
+  roles:
+    - genconfig

@@ -1,0 +1,14 @@
+- name: Bootstrap XOS database - create site, deployment, admin user
+  command: "python /opt/xos/tosca/run.py {{ xos_admin_user }} /opt/cord_profile/{{ item }}"
+  with_items:
+    - "fixtures.yaml"
+    - "deployment.yaml"
+
+- name: Configure XOS with OpenStack config
+  command: "python /opt/xos/tosca/run.py {{ xos_admin_user }} /opt/cord_profile/{{ item }}"
+  with_items:
+    - openstack.yaml
+
+- name: Configure XOS with profile specific TOSCA
+  command: "python /opt/xos/tosca/run.py {{ xos_admin_user }} /opt/cord_profile/{{ item }}"
+  with_items: "{{ xos_tosca_config_templates }}"

@@ -1,0 +1,20 @@
+[control]
+localhost       ansible_connection=local
+
+[config]
+localhost       ansible_connection=local
+
+
+[head]
+172.16.50.27
+
+
+[onos-cord:children]
+control
+
+[onos-fabric:children]
+control
+
+[xos:children]
+control
+

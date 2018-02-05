@@ -1,0 +1,50 @@
+---
+project_name: "onos"
+
+############
+#Container
+###########
+onos_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/onos"
+onos_tag: "{{ cord_release }}"
+onos_image_full: "{{ onos_image }}:{{ onos_tag }}"
+
+maven_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/mavenrepo"
+maven_tag: "{{ cord_release }}"
+maven_image_full: "{{ maven_image }}:{{ maven_tag }}"
+
+onos_fabric_apps: "drivers,openflow,segmentrouting,fpm,dhcprelay,netcfghostprovider,routeradvertisement"
+
+head_mavenrepo_dir: /opt/mavenrepo
+
+onos_cord_port: 8102
+
+onos_debug_level: "TRACE"
+
+onos_debug_appnames:
+  - org.opencord.vtn
+
+
+maven_services:
+  maven-repo:
+    container_name: "maven_repo"
+    group: "maven-repo"
+    enabled: true
+    image: "{{ maven_image_full }}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+onos_services:
+  onos-cord:
+    container_name: "onos_cord"
+    group: "onos-cord"
+    enabled: true
+    image: "{{ onos_image_full }}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+  onos-fabric:
+    container_name: "onos_fabric"
+    group: "onos-fabric"
+    enabled: true
+    image: "{{ onos_image_full }}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"

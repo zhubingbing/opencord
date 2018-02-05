@@ -1,0 +1,45 @@
+- name: Restart onos-cord container
+  vars:
+    service_name: "onos-cord"
+    service: "{{ onos_services[service_name] }}"
+    onos_container: "{{ check_onos_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+  docker_container:
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    status: "started" 
+    network_mode: bridge
+    volumes: "{{ service.volumes }}"
+    ports:
+       - "6654:6653"
+       - "8102:8101"
+       - "8182:8181"
+       - "9877:9876"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - onos_container.changed | bool
+
+
+- name: Restart onos-fabric container
+  vars:
+    service_name: "onos-fabric"
+    service: "{{ onos_services[service_name] }}"
+    onos_container: "{{ check_onos_containers.results|selectattr('item.key', 'equalto', service_name)|first }}"
+  docker_container: 
+    name: "{{ service.container_name }}"
+    image: "{{ service.image }}"
+    status: "started"
+    volumes: "{{ service.volumes }}"
+    network_mode: bridge
+    env:
+      ONOS_APPS: "{{ onos_fabric_apps }}"
+    ports:
+      - "6653:6653" # OpenFlow
+      - "8101:8101" # ONOS SSH
+      - "8181:8181" # ONOS UI/API
+      - "9876:9876" # ONOS Clustering
+      - "2620:2620" # vRouter
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+    - onos_container.changed | bool

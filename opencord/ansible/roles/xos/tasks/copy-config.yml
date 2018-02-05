@@ -1,0 +1,9 @@
+- name: Copy (sync) the cord directory to head node
+  become: yes
+  synchronize:
+    src: "{{ config_cord_dir }}/"
+    dest: "{{ head_cord_dir }}/"
+  with_items:
+   - "cord_profile"
+   - "key"
+

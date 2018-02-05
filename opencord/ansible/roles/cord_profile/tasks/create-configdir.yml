@@ -1,0 +1,50 @@
+- name: Print config_cord_profile_dir vars
+  debug:
+    var: config_cord_profile_dir
+
+# become version of directory creation from `cord-profile` role
+- name: Create cord_profile directory, privileged
+  become: yes
+  file:
+    path: "{{ config_cord_profile_dir }}"
+    state: directory
+    mode: 0755
+
+# become version of directory creation from `pki-root-ca` role
+- name: Create PKI and credentials directories, privileged
+  become: yes
+  file:
+    dest: "{{ item }}"
+    state: directory
+    mode: 0700
+  with_items:
+    - "{{ credentials_dir }}"
+    - "{{ pki_dir }}"
+
+- name: Create root CA directory, privileged
+  become: yes
+  file:
+    dest: "{{ pki_dir }}/root_ca"
+    state: directory
+    mode: 0755
+
+# become version of directory creation from `pki-intermediate-ca` role
+- name: Create intermediate CA directory, privileged
+  become: yes
+  file:
+    dest: "{{ pki_dir }}/{{ site_name }}_im_ca"
+    state: directory
+    mode: 0755
+
+# become version of directory creation from `ssh-pki` role
+- name: Create SSH CA Directory
+  become: yes
+  file:
+    dest: "{{ item }}"
+    state: directory
+    mode: 0700
+  with_items:
+    - "{{ ssh_pki_dir }}"
+    - "{{ ssh_pki_dir }}/ca"
+    - "{{ ssh_pki_dir }}/client_certs"
+    - "{{ ssh_pki_dir }}/host_certs"

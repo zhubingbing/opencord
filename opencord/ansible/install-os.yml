@@ -1,0 +1,9 @@
+
+- name: install docker and ansible
+  hosts: head
+  roles:
+    - { role: docker,
+        tags: docker }
+    - { role: ansible,
+        tags: ansible }
+

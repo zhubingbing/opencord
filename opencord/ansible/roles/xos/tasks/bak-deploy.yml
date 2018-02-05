@@ -1,0 +1,22 @@
+---
+- include: consul_config.yml
+  when: inventory_hostname in groups['consul-server']
+
+- include: registrator_config.yml
+  when: inventory_hostname in groups['registrator']
+
+- include: redis_config.yml
+  when: inventory_hostname in groups['redis']
+
+- include: xos_config.yml
+  when: inventory_hostname in groups['registrator']
+
+- include: gui_extension_config.yml
+
+- include: onos.yml
+  when: inventory_hostname in groups['onos-cord']
+        or inventory_hostname in groups['onos-fabric']
+
+
+- name: Flush handlers
+  meta: flush_handlers

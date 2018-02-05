@@ -1,0 +1,27 @@
+- name: Include variables
+  include_vars: "{{ item }}"
+  with_items:
+    - "{{ cord_workdir }}/build/platform-install/profile_manifests/{{ cord_profile }}.yml"
+    - "{{ cord_workdir }}/build/platform-install/profile_manifests/local_vars.yml"
+
+
+- name: Create docker networks
+  docker_network:
+    name: "{{ item }}"
+  with_items: "{{ xos_docker_networks }}"
+
+
+- name: Print cord_profile vars
+  debug:
+    var: "{{ cord_profile | regex_replace('\\W','') }}"
+
+- name: Bring up XOS services
+  docker_service:
+    project_name: "{{ cord_profile | regex_replace('\\W','') }}"
+    project_src: "{{ config_cord_profile_dir }}"
+    pull: "{{ always_pull_xos_images | default('false') }}"
+  register: output
+
+- name: Print vars
+  debug:
+    var: output

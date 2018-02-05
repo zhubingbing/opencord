@@ -1,0 +1,15 @@
+- include: consul.yml
+  when:
+    - inventory_hostname in groups['consul-server']
+
+- include: registrator.yml
+  when:
+    - inventory_hostname in groups[registrator]
+
+- include: redis.yml
+  when:
+    - inventory_hostname in groups[redis]
+
+- include: xos.yml
+
+- include: gui-extension.yml

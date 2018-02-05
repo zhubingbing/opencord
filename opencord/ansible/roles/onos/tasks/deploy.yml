@@ -1,0 +1,8 @@
+#- include: maven_repo.yml
+#  when: inventory_hostname in groups['maven-repo']
+
+- include: maven_repo.yml
+
+- include: onos.yml
+
+#- include: post-test.yml
